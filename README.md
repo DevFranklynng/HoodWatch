@@ -14,11 +14,14 @@ Spec:   https://1-community-watch-api.vercel.app/openapi.json
 
 ## Auth
 
-Uses the httpOnly session cookie the API sets on register and login
-(`community_watch_token`), not a bearer token. `src/lib/api.js` sends
-`credentials: "include"` on every request; there's no token stored or read
-on the client. `AuthContext` calls `GET /auth/me` once on load to restore
-the session if the cookie is present.
+Primary auth is the httpOnly session cookie the API sets on register and
+login (`community_watch_token`) — `src/lib/api.js` sends
+`credentials: "include"` on every request. Some browsers (third-party
+cookie blocking, in-app webviews, Safari ITP) won't retain a cross-site
+cookie like that, so login/register responses also carry a bearer token
+that's kept in `sessionStorage` and sent as `Authorization: Bearer` on
+every request as a fallback. `AuthContext` calls `GET /auth/me` once on
+load to restore the session either way.
 
 ## Roles
 
@@ -34,8 +37,10 @@ server-side regardless.
 
 ## Registration and login
 
-Registration is shared: `/register` has a Resident / Patrol officer / Admin
-picker and routes into `/dashboard` or `/admin` based on the role chosen.
+`/register` creates a resident account only, then sends the person to
+`/login` with an "account created" notice. Admins and patrol officers
+aren't self-service — those accounts are provisioned manually by whoever
+runs the deployment.
 
 Login is split:
 
@@ -123,7 +128,6 @@ npm run dev
   account info and sign-out.
 - `GET /public/stats` doesn't return a `recentPublicNotices` field despite
   early assumptions — the landing page only uses the `overview` block.
-- Cookie auth needs the browser to accept the cross-site cookie between
-  this frontend's origin and the API's. Standard for modern browsers with
-  proper `SameSite=None; Secure` config, but worth checking first if auth
-  ever misbehaves in one specific browser or an in-app webview.
+- If a browser blocks the cross-site cookie entirely, the bearer fallback
+  only survives for the current tab session (`sessionStorage`) — closing
+  the tab still ends the session in that case.
