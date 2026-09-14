@@ -1,26 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, User, Footprints, Radar } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
-import { apiFetch, extractUser, extractToken } from "../lib/api";
-import { useAuth } from "../auth/AuthContext";
-import ThemeToggle from "../components/ThemeToggle";
-
-const ROLE_OPTIONS = [
-  { value: "resident", label: "Resident", icon: User },
-  { value: "patrol_officer", label: "Patrol officer", icon: Footprints },
-  { value: "admin", label: "Admin", icon: Radar },
-];
+import { apiFetch } from "../lib/api";
 
 function Register() {
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    role: "resident",
     zone: "",
     phone: "",
   });
@@ -50,26 +40,19 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await apiFetch("/auth/register", {
+      await apiFetch("/auth/register", {
         method: "POST",
         body: JSON.stringify({
           name: form.name,
           email: form.email,
           password: form.password,
-          role: form.role,
+          role: "resident",
           zone: form.zone || undefined,
           phone: form.phone || undefined,
         }),
       });
 
-      const userData = extractUser(response);
-
-      if (userData) {
-        login(userData, extractToken(response));
-        navigate(userData.role === "admin" ? "/admin" : "/dashboard");
-      } else {
-        navigate("/login");
-      }
+      navigate("/login", { state: { justRegistered: true } });
     } catch (err) {
       setError(err.message || "Unable to create your account.");
     } finally {
@@ -80,10 +63,6 @@ function Register() {
   return (
     <div className="min-h-screen bg-bg px-4 py-10">
       <div className="mx-auto max-w-md">
-        <div className="mb-4 flex justify-end">
-          <ThemeToggle />
-        </div>
-
         <div className="mb-8 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white">
             <ShieldCheck size={24} />
@@ -94,7 +73,7 @@ function Register() {
           </h1>
 
           <p className="mt-2 text-sm text-muted">
-            Create your account to get started.
+            Create your resident account to get started.
           </p>
         </div>
 
@@ -109,37 +88,6 @@ function Register() {
           )}
 
           <div className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink">
-                I am a...
-              </label>
-
-              <div className="grid grid-cols-3 gap-2">
-                {ROLE_OPTIONS.map((option) => {
-                  const Icon = option.icon;
-                  const isActive = form.role === option.value;
-
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() =>
-                        setForm((current) => ({ ...current, role: option.value }))
-                      }
-                      className={`flex flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-xs font-semibold transition ${
-                        isActive
-                          ? "border-primary bg-accent-soft text-primary"
-                          : "border-border text-muted hover:border-primary/40"
-                      }`}
-                    >
-                      <Icon size={17} />
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <div>
               <label
                 htmlFor="name"
@@ -253,7 +201,7 @@ function Register() {
           <p className="mt-5 text-center text-sm text-muted">
             Already have an account?{" "}
             <Link
-              to={form.role === "admin" ? "/admin/login" : "/login"}
+              to="/login"
               className="font-semibold text-primary hover:underline"
             >
               Sign in

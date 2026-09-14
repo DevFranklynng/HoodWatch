@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
 
 import { apiFetch, extractUser, extractToken } from "../lib/api";
@@ -8,6 +8,7 @@ import ThemeToggle from "../components/ThemeToggle";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const [form, setForm] = useState({
@@ -85,6 +86,12 @@ function Login() {
           {error && (
             <div className="mb-5 rounded-lg border border-border bg-critical-soft p-3 text-sm text-critical">
               {error}
+            </div>
+          )}
+
+          {!error && location.state?.justRegistered && (
+            <div className="mb-5 rounded-lg border border-border bg-accent-soft p-3 text-sm text-primary">
+              Account created. Sign in to continue.
             </div>
           )}
 

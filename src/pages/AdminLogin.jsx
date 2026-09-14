@@ -140,13 +140,6 @@ function AdminLogin() {
             {loading ? "Verifying..." : "Enter control room"}
           </button>
         </form>
-
-        <p className="mt-6 text-center text-xs text-white/40">
-          New admin?{" "}
-          <Link to="/register" className="font-semibold text-white/70 hover:underline">
-            Create an account
-          </Link>
-        </p>
       </div>
     </div>
   );
