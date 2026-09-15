@@ -164,6 +164,7 @@ function Register() {
                 onChange={handleChange}
                 placeholder="e.g. Oak Ridge"
                 className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm outline-none transition focus:border-primary"
+                required
               />
             </div>
 

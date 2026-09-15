@@ -154,12 +154,7 @@ function Login() {
           </p>
         </form>
 
-        <p className="mt-6 text-center text-xs text-muted">
-          Administrator?{" "}
-          <Link to="/admin/login" className="font-semibold text-ink hover:underline">
-            Sign in to the control room
-          </Link>
-        </p>
+        
       </div>
     </div>
   );
